@@ -1,0 +1,136 @@
+# Default configuration for Stream-DAD training and evaluation
+
+# Experiment settings
+experiment:
+  name: "stream_dad_default"
+  save_dir: "./experiments/runs"
+  seed: 42
+
+# Data configuration
+data:
+  window_size: 10
+  stride: 1
+  batch_size: 1  # Streaming mode
+  normalize: true
+  shuffle: false  # Maintain temporal order
+
+# Model architecture
+model:
+  hidden_dim: 64
+  num_layers: 2
+  dropout: 0.1
+
+  # Loss weights
+  lambda_ewc: 0.01
+  lambda_cons: 0.001
+  lambda_sparsity: 0.0001
+  lambda_entropy: 0.001
+
+  # Adaptive hyperparameters
+  lambda_ewc_base: 0.01
+  lambda_cons_base: 0.001
+
+  # Feature correlation
+  correlation_threshold: 0.3
+
+  # Gating network configuration
+  gating:
+    dropout: 0.1
+    importance_ema_alpha: 0.9
+    lambda_l1: 0.0001
+    lambda_entropy: 0.001
+
+  # Drift detection configuration
+  drift:
+    window_size: 50
+    drift_threshold: 0.5
+    adaptation_rate: 0.1
+    min_change_interval: 100
+    significance_level: 0.05
+    test_window_size: 30
+
+  # Continual learning configuration
+  continual:
+    fisher:
+      fisher_update_freq: 100
+      fisher_decay: 0.95
+      fisher_sparse_threshold: 1e-6
+
+    buffer:
+      capacity: 1000
+      diversity_threshold: 0.1
+
+    ewc_lambda: 0.01
+    ewc_alpha: 0.9
+    fisher_update_interval: 100
+    history_length: 100
+
+# Training configuration
+training:
+  max_steps: 10000
+  eval_interval: 100
+  save_interval: 1000
+  grad_clip: 1.0
+  adaptation_threshold: 0.3
+
+# Optimizer configuration
+optimizer:
+  type: "adam"
+  lr: 0.001
+  weight_decay: 1e-4
+
+# Learning rate scheduler
+scheduler:
+  use_scheduler: true
+  type: "step"
+  step_size: 1000
+  gamma: 0.95
+
+# Evaluation configuration
+evaluation:
+  window_size: 100
+  metrics:
+    - "f1_score"
+    - "auroc"
+    - "auprc"
+    - "false_alarm_rate"
+    - "detection_delay"
+    - "adaptation_latency"
+    - "forgetting_ratio"
+    - "feature_stability"
+
+# Logging configuration
+logging:
+  use_wandb: false
+  wandb_project: "stream-dad"
+  log_interval: 10
+
+# Device configuration
+device: "auto"  # auto, cpu, cuda
+
+# Synthetic data configuration (for synthetic datasets)
+synthetic:
+  num_features: 50
+  num_samples: 10000
+  anomaly_ratio: 0.05
+  seed: 42
+
+  drift:
+    type: "gradual"  # gradual, sudden, recurring, manifold
+    magnitude: 0.1
+    start: 5000
+    frequency: 0.01  # for recurring drift
+    affected_features: null  # null for random selection
+    num_affected_features: 16  # number of features to affect with drift
+
+# Dataset-specific configurations
+datasets:
+  swat:
+    features: 51
+    window_size: 10
+    normalize: true
+
+  wadi:
+    features: 123
+    window_size: 10
+    normalize: true
